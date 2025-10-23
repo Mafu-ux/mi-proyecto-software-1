@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inicio de Sesión | Sistema Restaurante</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #212529, #495057);
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-card {
+      background-color: #ffffff10;
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+      padding: 2rem;
+      width: 100%;
+      max-width: 400px;
+    }
+    .form-control {
+      border-radius: 10px;
+    }
+    .btn-login {
+      border-radius: 10px;
+      background-color: #0d6efd;
+      color: white;
+      font-weight: 600;
+    }
+    .btn-login:hover {
+      background-color: #0b5ed7;
+    }
+    .logo {
+      font-size: 2.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-card text-center">
+    <div class="logo mb-3">🍽</div>
+    <h3 class="mb-3">Sistema Restaurante</h3>
+    <p class="text-light">Inicia sesión para continuar</p>
+
+    <form id="formLogin" class="mt-4">
+      <div class="mb-3">
+        <input type="text" id="usuario" class="form-control" placeholder="Usuario" required>
+      </div>
+      <div class="mb-3">
+        <input type="password" id="password" class="form-control" placeholder="Contraseña" required>
+      </div>
+      <button type="submit" class="btn btn-login w-100">Iniciar Sesión</button>
+    </form>
+
+    <div id="mensaje" class="mt-3 text-warning fw-bold"></div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Simulación de base de datos de usuarios (mismo formato que en usuarios.html)
+    const usuarios = [
+      { usuario: "admin", password: "1234", rol: "admin" },
+      { usuario: "mesero1", password: "1234", rol: "mesero" },
+      { usuario: "cajero1", password: "1234", rol: "cajero" }
+    ];
+
+    const formLogin = document.getElementById("formLogin");
+    const mensaje = document.getElementById("mensaje");
+
+    // Guardar usuario en sesión
+    function guardarSesion(usuario) {
+      localStorage.setItem("usuarioActual", JSON.stringify(usuario));
+    }
+
+    // Iniciar sesión
+    formLogin.addEventListener("submit", e => {
+      e.preventDefault();
+      const user = document.getElementById("usuario").value.trim();
+      const pass = document.getElementById("password").value.trim();
+
+      const encontrado = usuarios.find(u => u.usuario === user && u.password === pass);
+
+      if (encontrado) {
+        guardarSesion(encontrado);
+        mensaje.textContent = "Acceso concedido. Redirigiendo...";
+        mensaje.classList.replace("text-warning", "text-success");
+
+        setTimeout(() => {
+          // Redirigir según el rol
+          if (encontrado.rol === "admin") {
+            window.location.href = "index.html";
+          } else if (encontrado.rol === "mesero") {
+            window.location.href = "pedidos.html";
+          } else {
+            window.location.href = "facturas.html";
+          }
+        }, 1000);
+      } else {
+        mensaje.textContent = "❌ Usuario o contraseña incorrectos";
+        mensaje.classList.replace("text-success", "text-warning");
+      }
+    });
+  </script>
+
+</body>
+</html>

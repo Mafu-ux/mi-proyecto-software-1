@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alertas de Bajo Stock</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .alerta-baja {
+      animation: parpadeo 1.2s infinite alternate;
+    }
+    @keyframes parpadeo {
+      from { background-color: #f8d7da; }
+      to { background-color: #f5c6cb; }
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">🍽️ Restaurante</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <button class="btn btn-outline-light btn-sm" onclick="cerrarSesion()">Cerrar sesión</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <h2 class="text-center mb-4">⚠️ Alertas de Bajo Stock</h2>
+
+    <div id="contenedorAlertas"></div>
+
+    <div class="card shadow-sm mt-4">
+      <div class="card-body">
+        <h5 class="mb-3">📋 Inventario actual</h5>
+        <table class="table table-striped table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th>#</th>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th>Cantidad</th>
+              <th>Precio</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tablaInventario"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Cargar inventario guardado
+    let inventario = JSON.parse(localStorage.getItem("inventario")) || [];
+
+    // Mostrar inventario
+    function mostrarInventario() {
+      const tbody = document.getElementById("tablaInventario");
+      tbody.innerHTML = "";
+
+      inventario.forEach((p, i) => {
+        const estado = p.cantidad <= 5
+          ? '<span class="badge bg-danger">Bajo stock</span>'
+          : '<span class="badge bg-success">Disponible</span>';
+
+        tbody.innerHTML += `
+          <tr class="${p.cantidad <= 5 ? 'alerta-baja' : ''}">
+            <td>${i + 1}</td>
+            <td>${p.nombre}</td>
+            <td>${p.categoria}</td>
+            <td>${p.cantidad}</td>
+            <td>$${p.precio.toLocaleString()}</td>
+            <td>${estado}</td>
+          </tr>
+        `;
+      });
+    }
+
+    // Mostrar alertas
+    function mostrarAlertas() {
+      const contenedor = document.getElementById("contenedorAlertas");
+      contenedor.innerHTML = "";
+
+      const productosBajos = inventario.filter(p => p.cantidad <= 5);
+
+      if (productosBajos.length === 0) {
+        contenedor.innerHTML = `
+          <div class="alert alert-success text-center" role="alert">
+            ✅ Todos los productos tienen stock suficiente.
+          </div>
+        `;
+        return;
+      }
+
+      productosBajos.forEach(p => {
+        contenedor.innerHTML += `
+          <div class="alert alert-danger d-flex justify-content-between align-items-center" role="alert">
+            <div>
+              <strong>${p.nombre}</strong> (${p.categoria}) tiene solo <strong>${p.cantidad}</strong> unidades.
+            </div>
+            <button class="btn btn-sm btn-outline-light bg-danger" onclick="reabastecer('${p.nombre}')">
+              🔄 Reabastecer
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    // Simular reabastecimiento
+    function reabastecer(nombre) {
+      const producto = inventario.find(p => p.nombre === nombre);
+      if (producto) {
+        producto.cantidad += 10;
+        localStorage.setItem("inventario", JSON.stringify(inventario));
+        mostrarInventario();
+        mostrarAlertas();
+        alert(`✅ Se han agregado 10 unidades a ${nombre}.`);
+      }
+    }
+
+    // Cerrar sesión
+    function cerrarSesion() {
+      localStorage.removeItem("usuarioActual");
+      window.location.href = "login.html";
+    }
+
+    // Inicialización
+    mostrarInventario();
+    mostrarAlertas();
+  </script>
+
+</body>
+</html>
